@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,33 +11,30 @@
 
 .topbar{position:sticky;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:12px;padding:18px clamp(14px,3.5vw,64px) 10px;background:linear-gradient(180deg,#090a10f0 60%,transparent);backdrop-filter:blur(10px)}
 .nav{display:flex;gap:8px;align-items:center;padding:7px;background:#34323b9c;border:1px solid #ffffff25;border-radius:40px;box-shadow:0 8px 28px #0003;backdrop-filter:blur(18px)}
-.nav button,.mobile-nav button{border:0;background:transparent;color:#e0dfe4;padding:10px 19px;border-radius:30px;font-weight:700}
+.nav button{border:0;background:transparent;color:#e0dfe4;padding:10px 19px;border-radius:30px;font-weight:700}
 .nav button.active{color:#111;background:#fff;box-shadow:0 2px 8px #0002}
-.nav button.active,.nav button:hover,.mobile-nav button.active{color:white;background:#9b7bff25}
+.nav button.active,.nav button:hover{color:white;background:#9b7bff25}
 .search-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border:1px solid #ffffff2b;border-radius:50%;background:#34323b9c;color:#fff;backdrop-filter:blur(18px);box-shadow:0 8px 28px #0003;transition:background .18s,transform .18s}
 .search-icon:hover{background:#9b7bff55;transform:scale(1.04)}
 .search-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 .main{padding:15px clamp(14px,3vw,38px) 80px}.page-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:10px 0 20px}.eyebrow{color:var(--accent2);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.page-head h1{font-size:clamp(27px,4vw,42px);letter-spacing:-1.4px;margin:4px 0}.sub{color:var(--muted);margin:0}
 
-.hero{min-height:min(720px,85vh);height:min(720px,85vh);position:relative;display:flex;align-items:flex-end;overflow:hidden;border-radius:0;background:#202337;margin:-85px calc(clamp(14px,3vw,38px) * -1) 30px;border:0;cursor:pointer;transition:opacity .15s}
+.hero{position:relative;width:100%;aspect-ratio:16/9;max-height:75vh;min-height:360px;display:flex;align-items:flex-end;overflow:hidden;border-radius:16px;background:#202337;margin:10px 0 30px;cursor:pointer;transition:opacity .15s}
 .hero:hover{opacity:.97}
 .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%;opacity:.96}
-.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#090a10df 0%,#090a1066 45%,transparent 100%),linear-gradient(90deg,#16131ac9 0%,#2420277d 34%,transparent 72%)}
-.hero-content{position:relative;z-index:1;padding:clamp(22px,4.7vw,64px);max-width:900px;width:100%}
-.hero-title-slot{margin-bottom:14px}
-.hero-title-logo{display:block;width:min(480px,55vw);max-height:160px;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 3px 14px #0008)}
-.hero-title-text{font-size:clamp(38px,5vw,68px);line-height:1.02;font-weight:950;letter-spacing:-2px;margin:0;color:#fff;text-shadow:0 3px 22px #0008}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#090a10ea 0%,#090a1055 50%,transparent 100%),linear-gradient(90deg,#090a10cc 0%,transparent 70%)}
+.hero-content{position:relative;z-index:1;padding:clamp(20px,4vw,45px);max-width:900px;width:100%}
+.hero-title-slot{margin-bottom:12px}
+.hero-title-logo{display:block;width:min(420px,50vw);max-height:130px;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 3px 14px #0008)}
+.hero-title-text{font-size:clamp(32px,4.5vw,60px);line-height:1.02;font-weight:950;letter-spacing:-2px;margin:0;color:#fff;text-shadow:0 3px 22px #0008}
 
-.hero-nav-controls{position:absolute;right:30px;bottom:30px;z-index:3;display:flex;gap:10px}
-.hero-nav-btn{background:#34323bba;border:1px solid #ffffff30;color:#fff;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:bold;backdrop-filter:blur(10px);transition:background .2s,transform .2s}
+.hero-nav-controls{position:absolute;right:25px;bottom:25px;z-index:3;display:flex;gap:8px}
+.hero-nav-btn{background:#34323bba;border:1px solid #ffffff30;color:#fff;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:bold;backdrop-filter:blur(10px);transition:background .2s,transform .2s}
 .hero-nav-btn:hover{background:#9b7bffaa;transform:scale(1.08)}
 
-@media(max-width:700px){.hero-title-logo{width:min(78vw,340px);max-height:110px}.hero-title-text{font-size:clamp(30px,9vw,48px);letter-spacing:-1px}.hero-nav-controls{right:16px;bottom:20px}}
-
-.hero p{color:#fff;max-width:780px;font-size:clamp(14px,1.3vw,18px);font-weight:500;line-height:1.5;text-shadow:0 1px 8px #0005;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 14px}
-.pills{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:#fff;font-size:13px}.hero .pills{font-size:clamp(13px,1.1vw,16px);font-weight:700}
-.pill{background:#ffffff18;border:1px solid #ffffff24;padding:5px 9px;border-radius:99px}
+.pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff}
+.pill{background:#ffffff18;border:1px solid #ffffff24;padding:4px 10px;border-radius:99px;font-size:13px;font-weight:700}
 
 .section{margin:28px 0}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}.section-title h2{font-size:20px;margin:0;letter-spacing:-.4px}.section-title span{color:var(--muted);font-size:12px}
 .grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:17px}.card{min-width:0;cursor:pointer;transition:transform .18s}.card:hover{transform:translateY(-4px)}
@@ -64,18 +60,66 @@
 .episode{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;background:var(--panel);padding:10px;border-radius:13px;border:1px solid #ffffff0c}
 .episode img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:var(--panel2)}.episode h3{margin:2px 0 7px;font-size:16px}.episode p{margin:6px 0;color:var(--muted);font-size:13px}
 .backbtn{background:var(--panel);border:1px solid var(--line);color:white;border-radius:10px;padding:9px 12px;margin-bottom:15px}
-.mobile-nav{display:none}.footer{text-align:center;color:#777d91;padding:25px 12px 40px;font-size:12px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:60;background:#222438;border:1px solid var(--line);padding:12px 16px;border-radius:12px;display:none}.hidden{display:none!important}
+
+/* Floating Mobile Navigation Bar (Image 2 Style) */
+.mobile-nav{display:none}
+
+.footer{text-align:center;color:#777d91;padding:25px 12px 40px;font-size:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:60;background:#222438;border:1px solid var(--line);padding:12px 16px;border-radius:12px;display:none}
+.hidden{display:none!important}
 
 @media(max-width:1100px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.landscape-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){
-  .topbar{gap:8px;padding:10px 13px;top:0}
-  .nav button[data-route="home"],.nav button[data-route="movie"],.nav button[data-route="tv"]{padding:8px 10px;font-size:11px}
-  .search-icon{width:38px;height:38px;flex:0 0 38px}
-  .main{padding:10px 13px 90px}.hero{min-height:600px;height:82vh;margin:-65px -13px 24px;align-items:flex-end}
-  .hero-content{padding:22px 20px 36px;margin-top:0}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.landscape-grid{grid-template-columns:1fr}
-  .page-head h1{font-size:30px}.detail-layout{grid-template-columns:105px minmax(0,1fr);gap:14px}.detail-hero{min-height:300px}
-  .episode{grid-template-columns:120px minmax(0,1fr);gap:10px;padding:8px}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:30;justify-content:space-around;background:#0b0b12f2;backdrop-filter:blur(15px);border-top:1px solid var(--line);padding:7px 3px calc(7px + env(safe-area-inset-bottom))}
-  .mobile-nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 13px;font-size:11px}.mobile-nav button span{font-size:18px}.footer{padding-bottom:100px}
+  .topbar{display:none} /* Hide topbar on mobile to fully use bottom floating nav */
+  .main{padding:12px 12px 90px}
+  .hero{aspect-ratio:16/9;max-height:60vh;margin:5px 0 20px}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .landscape-grid{grid-template-columns:1fr}
+  .page-head h1{font-size:26px}
+  .detail-layout{grid-template-columns:105px minmax(0,1fr);gap:14px}
+  .detail-hero{min-height:260px}
+  .episode{grid-template-columns:120px minmax(0,1fr);gap:10px;padding:8px}
+  
+  /* Floating Pill Bottom Nav */
+  .mobile-nav{
+    display:flex;
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:100;
+    align-items:center;
+    background:rgba(19,21,33,0.85);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:40px;
+    padding:6px 12px;
+    gap:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  }
+  .mobile-nav button{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    background:transparent;
+    border:0;
+    color:#9ba1b5;
+    padding:8px 12px;
+    border-radius:24px;
+    font-size:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:color .2s, background .2s;
+  }
+  .mobile-nav button.active{
+    color:#fff;
+    background:rgba(155,123,255,0.25);
+  }
+  .mobile-nav button span{
+    font-size:16px;
+  }
+  .footer{padding-bottom:90px}
 }
 @media(max-width:390px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.episode{grid-template-columns:1fr}.episode img{max-height:190px}.detail-layout{grid-template-columns:85px minmax(0,1fr)}}
 </style>
@@ -90,7 +134,10 @@
 </header>
 <main id="appMain" class="main"><div class="loading">Loading CineScope…</div></main>
 <nav class="mobile-nav" aria-label="Mobile navigation">
-  <button data-route="home"><span>⌂</span>Home</button><button data-route="movie"><span>▣</span>Movies</button><button data-route="tv"><span>▤</span>TV Shows</button>
+  <button data-route="home"><span>⌂</span>Home</button>
+  <button data-route="movie"><span>▣</span>Movies</button>
+  <button data-route="tv"><span>▤</span>TV</button>
+  <button data-route="search"><span>🔍</span>Search</button>
 </nav>
 <footer class="footer">Movie and TV discovery powered by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</footer>
 </div>
@@ -113,7 +160,8 @@ function mediaType(x){return x.media_type||(x.title?"movie":"tv")}
 function apiUrl(path,params={}){const u=new URL(API+path);u.searchParams.set("api_key",TMDB_API_KEY);Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=="")u.searchParams.set(k,v)});return u}
 async function api(path,params={}){const key=path+"?"+new URLSearchParams(params).toString();if(state.cache.has(key))return state.cache.get(key);const url=apiUrl(path,params);const r=await fetch(url);if(!r.ok){let msg="TMDB request failed ("+r.status+")";try{const j=await r.json();msg=j.status_message||msg}catch{}throw Error(msg)}const data=await r.json();state.cache.set(key,data);return data}
 function setNav(route){document.querySelectorAll("[data-route]").forEach(b=>b.classList.toggle("active",b.dataset.route===route))}
-function go(route,params={},replace=false){const url=new URL(location.href);url.hash=route+(Object.keys(params).length?"/"+encodeURIComponent(JSON.stringify(params)):"");if(replace)history.replaceState({route,params},"",url);else history.pushState({route,params},"",url);renderRoute(route,params)}
+function go(route,params={},replace=false){if(route==="search"){goSearchModal();return;}const url=new URL(location.href);url.hash=route+(Object.keys(params).length?"/"+encodeURIComponent(JSON.stringify(params)):"");if(replace)history.replaceState({route,params},"",url);else history.pushState({route,params},"",url);renderRoute(route,params)}
+function goSearchModal(){go("search");}
 function parseLocation(){let raw=location.hash.replace(/^#/,"");if(!raw)return {route:"home",params:{}};const slash=raw.indexOf("/");if(slash<0)return {route:raw||"home",params:{}};try{return {route:raw.slice(0,slash),params:JSON.parse(decodeURIComponent(raw.slice(slash+1)))}}catch{return {route:raw.slice(0,slash),params:{}}}}
 function card(x,type){const t=type||mediaType(x),id=x.id;const name=mediaTitle(x);return `<article class="card" tabindex="0" role="button" aria-label="Open ${esc(name)}" data-open="${t}" data-id="${id}"><div class="poster-wrap"><img loading="lazy" src="${img(x.poster_path)}" alt="${esc(name)} poster" onerror="this.src=PLACEHOLDER"><span class="rating">${rating(x.vote_average)}</span></div><h3 title="${esc(name)}">${esc(name)}</h3><div class="meta">${year(mediaDate(x))} · ${t==="movie"?"Movie":"TV"}</div></article>`}
 function cards(items,type){return items?.length?`<div class="grid">${items.map(x=>card(x,type)).join("")}</div>`:`<div class="empty">No titles found.</div>`}
@@ -138,7 +186,7 @@ async function homePage(){
     state.heroIndex=Math.max(0,state.heroItems.findIndex(x=>x.id===hero.id));
     
     const type=mediaType(hero);
-    main.innerHTML=`<section class="hero" id="homeHero" data-open="${type}" data-id="${hero.id}"><img class="hero-img" src="${img(hero.backdrop_path,"w1280")}" alt="" onerror="this.style.display='none'"><div class="hero-content"><div class="eyebrow">TRENDING THIS WEEK</div><div class="hero-title-slot" id="heroTitleSlot"><h2 class="hero-title-text">${esc(mediaTitle(hero))}</h2></div><p>${esc(hero.overview||"")}</p><div class="pills hero-meta"><span class="pill">${type==="movie"?"Movie":"TV Show"}</span><span class="pill">${year(mediaDate(hero))}</span><span class="pill">${rating(hero.vote_average)}</span></div></div><div class="hero-nav-controls" onclick="event.stopPropagation()"><button class="hero-nav-btn" id="heroPrev" title="Previous">‹</button><button class="hero-nav-btn" id="heroNext" title="Next">›</button></div></section>${section("Trending now",mix.slice(0,12))}${section("Popular movies",movies.results,"movie")}${section("Popular TV shows",tvs.results,"tv")}${section("Now playing · Wide view",land.results,"movie",true)}`;
+    main.innerHTML=`<section class="hero" id="homeHero" data-open="${type}" data-id="${hero.id}"><img class="hero-img" src="${img(hero.backdrop_path,"w1280")}" alt="" onerror="this.style.display='none'"><div class="hero-content"><div class="eyebrow">TRENDING THIS WEEK</div><div class="hero-title-slot" id="heroTitleSlot"><h2 class="hero-title-text">${esc(mediaTitle(hero))}</h2></div><div class="pills hero-meta"><span class="pill">${rating(hero.vote_average)}</span></div></div><div class="hero-nav-controls" onclick="event.stopPropagation()"><button class="hero-nav-btn" id="heroPrev" title="Previous">‹</button><button class="hero-nav-btn" id="heroNext" title="Next">›</button></div></section>${section("Trending now",mix.slice(0,12))}${section("Popular movies",movies.results,"movie")}${section("Popular TV shows",tvs.results,"tv")}${section("Now playing · Wide view",land.results,"movie",true)}`;
     
     updateHeroLogo(hero);
     startHeroCarousel();
@@ -190,9 +238,8 @@ function renderHeroItem(item){
   imgEl.style.display="";
   const eyebrow=hero.querySelector(".eyebrow");if(eyebrow)eyebrow.textContent="TRENDING THIS WEEK";
   updateHeroLogo(item);
-  const para=hero.querySelector("p");if(para)para.textContent=item.overview||"Explore popular movies and TV shows, ratings, and season guides.";
   const existing=hero.querySelector(".hero-meta");
-  const meta=`<div class="pills hero-meta"><span class="pill">${type==="movie"?"Movie":"TV Show"}</span><span class="pill">${year(mediaDate(item))}</span><span class="pill">${rating(item.vote_average)}</span></div>`;
+  const meta=`<div class="pills hero-meta"><span class="pill">${rating(item.vote_average)}</span></div>`;
   if(existing)existing.outerHTML=meta;
   hero.dataset.open=type;
   hero.dataset.id=item.id;
@@ -205,7 +252,7 @@ function startHeroCarousel(){
     const hero=$("#homeHero");if(!hero)return;
     state.heroIndex=(state.heroIndex+1)%state.heroItems.length;
     renderHeroItem(state.heroItems[state.heroIndex]);
-  },5000);
+  },4000);
 }
 
 function setupHeroControls(){
