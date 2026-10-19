@@ -18,9 +18,9 @@
 .search-icon:hover{background:#9b7bff55;transform:scale(1.04)}
 .search-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-.main{padding:15px clamp(14px,3vw,38px) 80px}.page-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:10px 0 20px}.eyebrow{color:var(--accent2);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.page-head h1{font-size:clamp(27px,4vw,42px);letter-spacing:-1.4px;margin:4px 0}.sub{color:var(--muted);margin:0}
+.main{padding:15px clamp(14px,3vw,38px) calc(100px + env(safe-area-inset-bottom))}.page-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:10px 0 20px}.eyebrow{color:var(--accent2);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.page-head h1{font-size:clamp(27px,4vw,42px);letter-spacing:-1.4px;margin:4px 0}.sub{color:var(--muted);margin:0}
 
-.hero{position:relative;width:100%;aspect-ratio:16/9;max-height:75vh;min-height:360px;display:flex;align-items:flex-end;overflow:hidden;border-radius:16px;background:#202337;margin:10px 0 30px;cursor:pointer;transition:opacity .15s}
+.hero{position:relative;width:100%;aspect-ratio:16/9;max-height:75vh;min-height:0;display:flex;align-items:flex-end;overflow:hidden;border-radius:16px;background:#202337;margin:10px 0 30px;cursor:pointer;transition:opacity .15s}
 .hero:hover{opacity:.97}
 .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%;opacity:.96}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#090a10ea 0%,#090a1055 50%,transparent 100%),linear-gradient(90deg,#090a10cc 0%,transparent 70%)}
@@ -71,8 +71,15 @@
 @media(max-width:1100px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.landscape-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){
   .topbar{display:none} /* Hide topbar on mobile to fully use bottom floating nav */
-  .main{padding:12px 12px 90px}
-  .hero{aspect-ratio:16/9;max-height:60vh;margin:5px 0 20px}
+  .main{padding:12px 12px calc(112px + env(safe-area-inset-bottom))}
+  .hero{aspect-ratio:16/9;width:100%;height:auto;min-height:0;max-height:none;margin:5px 0 20px}
+  .hero-content{padding:18px 18px 20px}
+  .hero-title-logo{width:min(70%,280px);max-height:82px}
+  .hero-title-text{font-size:clamp(28px,8vw,42px);letter-spacing:-1px}
+  .hero-nav-controls{right:12px;bottom:12px;gap:7px}
+  .hero-nav-btn{width:36px;height:36px}
+  .hero .eyebrow{font-size:10px;letter-spacing:1.6px}
+  .hero-meta .pill{font-size:12px}
   .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .landscape-grid{grid-template-columns:1fr}
   .page-head h1{font-size:26px}
@@ -119,9 +126,9 @@
   .mobile-nav button span{
     font-size:16px;
   }
-  .footer{padding-bottom:90px}
+  .footer{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
 }
-@media(max-width:390px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.episode{grid-template-columns:1fr}.episode img{max-height:190px}.detail-layout{grid-template-columns:85px minmax(0,1fr)}}
+@media(max-width:390px){.mobile-nav{width:calc(100vw - 20px);padding:6px}.mobile-nav button{min-height:58px}.mobile-nav button span{width:24px;height:24px}.mobile-nav button span svg{width:23px;height:23px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.episode{grid-template-columns:1fr}.episode img{max-height:190px}.detail-layout{grid-template-columns:85px minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -134,10 +141,10 @@
 </header>
 <main id="appMain" class="main"><div class="loading">Loading CineScope…</div></main>
 <nav class="mobile-nav" aria-label="Mobile navigation">
-  <button data-route="home"><span>⌂</span>Home</button>
-  <button data-route="movie"><span>▣</span>Movies</button>
-  <button data-route="tv"><span>▤</span>TV</button>
-  <button data-route="search"><span>🔍</span>Search</button>
+  <button data-route="home" aria-label="Home"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"></path><path d="M5.5 9v11h13V9M9.5 20v-7h5v7"></path></svg></span><b>Home</b></button>
+  <button data-route="movie" aria-label="Movies"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 3v4m8-4v4M8 17h8"></path></svg></span><b>Movies</b></button>
+  <button data-route="tv" aria-label="TV shows"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m8 2 4 3 4-3M8 10h8M8 14h5"></path></svg></span><b>TV</b></button>
+  <button data-route="search" aria-label="Search"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></span><b>Search</b></button>
 </nav>
 <footer class="footer">Movie and TV discovery powered by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</footer>
 </div>
