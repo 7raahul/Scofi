@@ -28,7 +28,7 @@ body.dt .main{padding-top:0}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#07080df5,#07080d55 52%,transparent),linear-gradient(90deg,#07080dbb,transparent 70%)}
 .hc{position:absolute;z-index:2;left:0;bottom:0;padding:clamp(14px,4vw,40px);max-width:75%}
 .hlogo{display:block;width:min(100%,170px);max-height:42px;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 3px 12px #000a)}
-.htitle{font-size:clamp(18px,4.8vw,36px);line-height:1.05;font-weight:800;letter-spacing:-.8px;margin-bottom:8px;text-shadow:0 2px 16px #0009}.hm{position:absolute;z-index:3;top:12px;left:12px}.hm .pill{padding:3px 9px;font-size:11px}.pill.y{color:#ffc83d;background:#000a}.pill.v{color:#ff4d4d;background:#000a}.dr{position:absolute;z-index:2;bottom:14px;left:calc(32px + min(33vw,160px));display:flex;gap:7px}.dr .pill{padding:3px 10px;font-size:12px}.still{flex:0 0 240px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--p)}.eh{font-size:clamp(24px,6vw,38px);font-weight:800;letter-spacing:-.9px;line-height:1.1;margin-top:4px}.dlogo{display:block;max-width:min(100%,200px);max-height:52px;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 2px 10px #000a)}
+.htitle{font-size:clamp(18px,4.8vw,36px);line-height:1.05;font-weight:800;letter-spacing:-.8px;margin-bottom:8px;text-shadow:0 2px 16px #0009}.hm{position:absolute;z-index:3;top:12px;left:12px}.hm .pill{padding:3px 9px;font-size:11px}.pill.y{color:#ffc83d;background:#000a}.pill.v{color:#ff4d4d;background:#000a}.dr{position:absolute;z-index:2;bottom:14px;left:calc(32px + min(33vw,160px));display:flex;gap:7px}.dr .pill{padding:3px 10px;font-size:12px}.still{flex:0 0 240px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--p)}.eh{font-size:clamp(24px,6vw,38px);font-weight:800;letter-spacing:-.9px;line-height:1.1;margin-top:4px}.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.sec .sh h2{margin:0}.bar2{display:flex;align-items:center;gap:14px;margin-bottom:18px}.cast{cursor:pointer}.ig{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:620px){.ig{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}}.ig img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--p)}.ig.lg{grid-template-columns:repeat(2,1fr)}.ig.lg img{object-fit:contain;padding:14px;border:1px solid var(--ln)}.dlogo{display:block;max-width:min(100%,200px);max-height:52px;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 2px 10px #000a)}
 .pills{display:flex;flex-wrap:wrap;gap:7px}
 .pill{padding:5px 11px;border-radius:99px;background:#ffffff1c;border:1px solid #ffffff22;backdrop-filter:blur(8px);font-size:12.5px;font-weight:700}
 .hb{position:absolute;z-index:3;right:12px;bottom:12px;display:flex;gap:7px}.hb .gl{width:36px;height:36px;font-size:20px}
@@ -91,7 +91,7 @@ const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>
 const img=(p,s="w342")=>p?IMG+s+p:PH,yr=v=>v?String(v).slice(0,4):"TBA",rate=v=>Number(v)>0?"★ "+Number(v).toFixed(1):"☆ NR";
 const ttl=x=>x.title||x.name||"Untitled",mdt=x=>x.release_date||x.first_air_date,mt=x=>x.media_type||(x.title?"movie":"tv");
 const dstr=v=>{if(!v)return"TBA";const d=new Date(v+"T12:00:00");return isNaN(d)?"TBA":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})};
-const S={cache:new Map(),route:"",pushes:0,mode:{home:"trending",movie:"popular",tv:"popular"},logos:new Map()};
+const S={cache:new Map(),route:"",pushes:0,ds:{},mode:{home:"trending",movie:"popular",tv:"popular"},logos:new Map()};
 const H={items:[],i:0,timer:0,tok:0,sw:false},feeds={};let cur=null,io=null;
 async function api(path,q={}){const k=path+"?"+new URLSearchParams(q);if(S.cache.has(k))return S.cache.get(k);const u=new URL(API+path);u.searchParams.set("api_key",KEY);for(const[a,b]of Object.entries(q))if(b!=null&&b!=="")u.searchParams.set(a,b);const r=await fetch(u);if(!r.ok){let m="TMDB request failed ("+r.status+")";try{m=(await r.json()).status_message||m}catch{}throw Error(m)}const d=await r.json();S.cache.set(k,d);return d}
 const err=e=>`<div class="err"><b>Couldn’t load TMDB data.</b><p>${esc(e.message)}</p><p>Check your connection and API key, then try again.</p></div>`;
@@ -161,17 +161,17 @@ async function detail(type,id){
   try{
     const d=await api(`/${type}/${id}`,{language:"en-US",append_to_response:"credits,recommendations"});
     const t=ttl(d),dt=type==="movie"?d.release_date:d.first_air_date,rt=type==="movie"?d.runtime:(d.episode_run_time||[])[0];
-        const cast=(d.credits?.cast||[]).slice(0,16),rec=(d.recommendations?.results||[]).filter(x=>x.poster_path).slice(0,14).map(x=>({...x,media_type:type}));
+        const cast=(d.credits?.cast||[]),rec=(d.recommendations?.results||[]).filter(x=>x.poster_path).slice(0,14).map(x=>({...x,media_type:type}));
     const seasons=(d.seasons||[]).filter(s=>s.season_number>0),long=(d.overview||"").length>190;
     window.CUR={d,type};
     m.innerHTML=`<div class="dh"><img src="${img(d.backdrop_path||d.poster_path,"w1280")}" alt="" onerror="this.style.display='none'"><div class="dbar"><button class="gl" id="bk" aria-label="Back">${I("back")}</button></div><div class="dr"><span class="pill y">${rate(d.vote_average)}</span>${d.vote_count?`<span class="pill v">${d.vote_count.toLocaleString()} votes</span>`:""}</div></div>
 <div class="dtop"><img class="dp" src="${img(d.poster_path)}" alt="${esc(t)} poster" onerror="this.src=PH"><div><div id="dl"><h1>${esc(t)}</h1></div><p class="sub">${yr(dt)}${rt?" · "+rt+" min":""} · ${type==="movie"?"Movie":"TV series"}</p></div></div>
 <div class="sec"><h2>Overview</h2>${d.tagline?`<p class="sub" style="margin-bottom:8px">${esc(d.tagline)}</p>`:""}<p class="ov${long?" cl":""}" id="ov">${esc(d.overview||"No overview available yet.")}</p>${long?'<button class="lnk" data-more>Read more</button>':""}</div>
 <div class="sec"><div class="facts"><div class="fact"><small>Status</small><b>${esc(d.status||"Unknown")}</b></div><div class="fact"><small>${type==="movie"?"Released":"First aired"}</small><b>${dstr(dt)}</b></div><div class="fact"><small>Language</small><b>${(d.original_language||"—").toUpperCase()}</b></div><div class="fact"><small>${type==="tv"?"Seasons":"Runtime"}</small><b>${type==="tv"?`${d.number_of_seasons||0} · ${d.number_of_episodes||0} eps`:rt?rt+" min":"—"}</b></div></div></div>
-${cast.length?`<div class="sec"><h2>Cast</h2><div class="row">${cast.map(c=>`<div class="cast"><img loading="lazy" src="${img(c.profile_path,"w185")}" alt="" onerror="this.src=PH"><b>${esc(c.name)}</b><span>${esc(c.character||"")}</span></div>`).join("")}</div></div>`:""}
+${castSec(cast,{t:type,id:d.id})}
 ${type==="tv"&&seasons.length?`<div class="sec"><h2>Episodes</h2><div class="chips" id="ss" style="margin-top:0">${seasons.map((s,i)=>`<button class="chip${i?"":" on"}" data-s="${s.season_number}">${esc(s.name)}</button>`).join("")}</div><div id="eps"></div></div>`:""}
 ${rec.length?`<div class="sec"><h2>More like this</h2><div class="row">${rec.map(card).join("")}</div></div>`:""}`;
-    logo({id:d.id,media_type:type}).then(u=>{if(!u)return;const i=new Image();i.className="dlogo";i.alt=t;i.onload=()=>{const b=$("#dl");if(b&&window.CUR&&CUR.d===d)b.replaceChildren(i)};i.src=u});if(type==="tv"&&seasons.length){const st=S.dstate&&S.dstate.id==d.id?S.dstate:null;S.dstate=null;const s0=st&&seasons.some(x=>x.season_number==st.s)?st.s:seasons[0].season_number;if(st)document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==s0));CUR.season=s0;eps(d.id,s0).then(()=>st&&scrollTo(0,st.y))}
+    logo({id:d.id,media_type:type}).then(u=>{if(!u)return;const i=new Image();i.className="dlogo";i.alt=t;i.onload=()=>{const b=$("#dl");if(b&&window.CUR&&CUR.d===d)b.replaceChildren(i)};i.src=u});const st=S.ds[type+d.id];delete S.ds[type+d.id];if(type==="tv"&&seasons.length){const s0=st&&seasons.some(x=>x.season_number==st.s)?st.s:seasons[0].season_number;if(st)document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==s0));CUR.season=s0;eps(d.id,s0).then(()=>st&&scrollTo(0,st.y))}else if(st)scrollTo(0,st.y);
   }catch(e){m.innerHTML=`<div style="padding-top:calc(20px + env(safe-area-inset-top))"><button class="gl" id="bk" aria-label="Back" style="margin-bottom:16px">${I("back")}</button>${err(e)}</div>`}
 }
 async function eps(id,n){const b=$("#eps");b.innerHTML='<p class="end">Loading episodes…</p>';try{const d=await api(`/tv/${id}/season/${n}`,{language:"en-US"});if($("#eps")!==b)return;b.innerHTML=d.episodes?.length?d.episodes.map(e=>`<article class="ep" tabindex="0" role="button" data-ep="${e.episode_number}" data-sn="${n}"><img loading="lazy" src="${img(e.still_path,"w300")}" alt="" onerror="this.src=PH"><div><h4>${e.episode_number}. ${esc(e.name||"Untitled episode")}</h4><p class="sub">${dstr(e.air_date)}${e.runtime?" · "+e.runtime+" min":""} · ${rate(e.vote_average)}</p><p>${esc(e.overview||"No description available.")}</p></div></article>`).join(""):'<p class="end">No episode details for this season yet.</p>'}catch(e){b.innerHTML=err(e)}}
@@ -183,15 +183,54 @@ async function episode(id,s,n){
     m.innerHTML=`<div class="dh"><img src="${img(e.still_path||st[0]?.file_path,"w1280")}" alt="" onerror="this.style.display='none'"><div class="dbar"><button class="gl" id="bk" aria-label="Back">${I("back")}</button></div></div>
 <div style="position:relative;z-index:1;margin-top:-34px"><p class="sub">Season ${esc(s)} · Episode ${esc(n)}</p><h1 class="eh">${esc(e.name||"Untitled episode")}</h1><div class="pills" style="margin-top:12px"><span class="pill y">${rate(e.vote_average)}</span><span class="pill">${dstr(e.air_date)}</span>${e.runtime?`<span class="pill">${e.runtime} min</span>`:""}</div></div>
 <div class="sec"><h2>Overview</h2><p class="ov">${esc(e.overview||"No description available for this episode yet.")}</p></div>
-${cast.length?`<div class="sec"><h2>Cast</h2><div class="row">${cast.map(c=>`<div class="cast"><img loading="lazy" src="${img(c.profile_path,"w185")}" alt="" onerror="this.src=PH"><b>${esc(c.name)}</b><span>${esc(c.character||"")}</span></div>`).join("")}</div></div>`:""}
-${st.length>1?`<div class="sec"><h2>Images</h2><div class="row">${st.map(x=>`<img class="still" loading="lazy" src="${img(x.file_path,"w500")}" alt="">`).join("")}</div></div>`:""}`;
+${castSec(cast,{t:"tv",id,s,e:n})}
+<div class="sec"><div class="sh"><h2>Images</h2><button class="lnk" data-im="${esc(JSON.stringify({id,s,e:n}))}">View all</button></div>${st.length>1?`<div class="row">${st.map(x=>`<img class="still" loading="lazy" src="${img(x.file_path,"w500")}" alt="">`).join("")}</div>`:""}</div>`;
   }catch(x){m.innerHTML=`<div style="padding-top:calc(20px + env(safe-area-inset-top))"><button class="gl" id="bk" aria-label="Back" style="margin-bottom:16px">${I("back")}</button>${err(x)}</div>`}
+}
+const castItem=c=>`<div class="cast" data-p="${c.id}" tabindex="0" role="button"><img loading="lazy" src="${img(c.profile_path,"w185")}" alt="" onerror="this.src=PH"><b>${esc(c.name)}</b><span>${esc(c.character||"")}</span></div>`;
+const castSec=(l,ctx)=>l.length?`<div class="sec"><div class="sh"><h2>Cast</h2><button class="lnk" data-ca="${esc(JSON.stringify(ctx))}">View all</button></div><div class="row">${l.slice(0,16).map(castItem).join("")}</div></div>`:"";
+const bar=(t,sub)=>`<div class="bar2"><button class="gl" id="bk" aria-label="Back">${I("back")}</button><div><h1 class="ph" style="margin:0">${t}</h1>${sub?`<p class="sub">${sub}</p>`:""}</div></div>`;
+async function castPage(p){
+  const m=$("#m");m.innerHTML=bar("Cast")+'<p class="end">Loading cast…</p>';
+  try{
+    let l;
+    if(p.t==="movie")l=(await api(`/movie/${p.id}/credits`,{language:"en-US"})).cast||[];
+    else if(p.e!=null){const e=await api(`/tv/${p.id}/season/${p.s}/episode/${p.e}`,{language:"en-US",append_to_response:"credits"}),seen=new Set();l=[...(e.credits?.cast||[]),...(e.guest_stars||[]),...(e.credits?.guest_stars||[])].filter(c=>c.id&&!seen.has(c.id)&&seen.add(c.id))}
+    else l=((await api(`/tv/${p.id}/aggregate_credits`,{language:"en-US"})).cast||[]).sort((a,b)=>(a.order??999)-(b.order??999)).map(c=>({...c,character:c.roles?.[0]?.character}));
+    m.innerHTML=bar("Cast",l.length+" people")+(l.length?`<div class="grid">${l.map(c=>`<article class="cd" tabindex="0" role="button" data-p="${c.id}"><div class="pw"><img loading="lazy" decoding="async" src="${img(c.profile_path,"w342")}" alt="" onerror="this.src=PH"></div><h3>${esc(c.name)}</h3><p>${esc(c.character||"")}</p></article>`).join("")}</div>`:'<p class="end">No cast information yet.</p>');
+  }catch(x){m.innerHTML=bar("Cast")+err(x)}
+}
+async function person(id){
+  const m=$("#m");m.innerHTML=bar("Profile")+'<p class="end">Loading profile…</p>';
+  try{
+    const d=await api(`/person/${id}`,{language:"en-US",append_to_response:"combined_credits"}),cc=d.combined_credits||{},seen=new Set();
+    let L=cc.cast||[];if(!L.length)L=cc.crew||[];
+    L=L.filter(x=>x.poster_path&&["movie","tv"].includes(x.media_type)&&!seen.has(x.media_type+x.id)&&seen.add(x.media_type+x.id)).sort((a,b)=>(b.popularity||0)-(a.popularity||0));
+    const nm=L.filter(x=>x.media_type==="movie").length,nt=L.length-nm,k0=nm||!nt?"movie":"tv";
+    let age="";if(d.birthday){const[by,bm,bd]=d.birthday.split("-").map(Number),e=d.deathday?new Date(d.deathday+"T12:00:00"):new Date();let a=e.getFullYear()-by;if(e.getMonth()+1<bm||(e.getMonth()+1===bm&&e.getDate()<bd))a--;if(a>=0)age=a}
+    const F=[["Born",d.birthday?dstr(d.birthday):""],d.deathday?["Died",dstr(d.deathday)+(age!==""?" (aged "+age+")":"")]:["Age",age!==""?age+" years":""],["Birthplace",d.place_of_birth],["Known for",d.known_for_department]].filter(f=>f[1]),long=(d.biography||"").length>240;
+    m.innerHTML=`${bar("Profile")}<div class="dtop" style="margin-top:6px;align-items:flex-start"><img class="dp" src="${img(d.profile_path,"w500")}" alt="${esc(d.name)}" onerror="this.src=PH"><div><h1 class="eh">${esc(d.name)}</h1></div></div>
+${F.length?`<div class="sec"><div class="facts">${F.map(f=>`<div class="fact"><small>${f[0]}</small><b>${esc(f[1])}</b></div>`).join("")}</div></div>`:""}
+${d.biography?`<div class="sec"><h2>Biography</h2><p class="ov${long?" cl":""}" id="ov" style="white-space:pre-line">${esc(d.biography)}</p>${long?'<button class="lnk" data-more>Read more</button>':""}</div>`:""}
+${L.length?`<div class="sec"><h2>Filmography</h2><div class="chips" style="margin-top:0">${nm?`<button class="chip${k0==="movie"?" on":""}" data-pf="movie">Movies (${nm})</button>`:""}${nt?`<button class="chip${k0==="tv"?" on":""}" data-pf="tv">TV Shows (${nt})</button>`:""}</div><div class="grid" id="pg">${L.map(card).join("")}</div></div>`:""}`;
+    document.querySelectorAll("#pg .cd").forEach(c=>c.hidden=c.dataset.o!==k0);
+  }catch(x){m.innerHTML=bar("Profile")+err(x)}
+}
+const igHtml=t=>t[0]==="Posters"?`<div class="grid">${t[1].map(x=>`<div class="pw"><img loading="lazy" src="${img(x.file_path,t[2])}" alt=""></div>`).join("")}</div>`:`<div class="ig${t[0]==="Logos"?" lg":""}">${t[1].map(x=>`<img loading="lazy" src="${img(x.file_path,t[2])}" alt="">`).join("")}</div>`;
+async function images(id,s,e){
+  const m=$("#m");m.innerHTML=bar("Images")+'<p class="end">Loading images…</p>';
+  try{
+    const q={include_image_language:"en,null"},[a,b]=await Promise.all([api(`/tv/${id}/season/${s}/episode/${e}/images`,q),api(`/tv/${id}/images`,q)]);
+    const T=[["Episode",a.stills||[],"w780"],["Backdrops",b.backdrops||[],"w780"],["Posters",b.posters||[],"w342"],["Logos",b.logos||[],"w300"]].filter(t=>t[1].length);
+    window.IG=T;
+    m.innerHTML=bar("Images")+(T.length?`<div class="chips" style="margin-top:0">${T.map((t,i)=>`<button class="chip${i?"":" on"}" data-it="${i}">${t[0]} (${t[1].length})</button>`).join("")}</div><div id="ig">${igHtml(T[0])}</div>`:'<p class="end">No images available for this episode yet.</p>');
+  }catch(x){m.innerHTML=bar("Images")+err(x)}
 }
 /* router */
 function parse(){const r=location.hash.replace(/^#/,"");if(!r)return{r:"home",p:{}};const i=r.indexOf("/");if(i<0)return{r,p:{}};try{return{r:r.slice(0,i),p:JSON.parse(decodeURIComponent(r.slice(i+1)))}}catch{return{r:r.slice(0,i),p:{}}}}
 function go(r,p={},rep){
   if(!rep&&r===S.route&&r!=="detail"&&r!=="search"){scrollTo({top:0,behavior:"smooth"});return}
-  if(cur)cur.y=scrollY;
+  if(cur)cur.y=scrollY;if(S.route==="detail"&&window.CUR)S.ds[CUR.type+CUR.d.id]={s:CUR.season,y:scrollY};
   const u=new URL(location.href);u.hash=r+(Object.keys(p).length?"/"+encodeURIComponent(JSON.stringify(p)):"");
   if(rep)history.replaceState({r,p},"",u);else{history.pushState({r,p},"",u);S.pushes++}
   render(r,p);
@@ -202,7 +241,7 @@ function render(r,p={}){
   document.querySelectorAll("#dock button").forEach(b=>b.classList.toggle("on",b.dataset.r===r));
   if(!["home","movie","tv"].includes(r))scrollTo(0,0);
   if(r==="home")home();else if(r==="movie"||r==="tv")feedPage(r,`<h1 class="ph">${r==="movie"?"Movies":"TV Shows"}</h1>`);
-  else if(r==="search")search(p.q||"");else if(r==="detail")detail(p.type||"movie",p.id);else if(r==="episode")episode(p.id,p.s,p.e);else go("home",{},true);
+  else if(r==="search")search(p.q||"");else if(r==="detail")detail(p.type||"movie",p.id);else if(r==="episode")episode(p.id,p.s,p.e);else if(r==="cast")castPage(p);else if(r==="person")person(p.id);else if(r==="images")images(p.id,p.s,p.e);else go("home",{},true);
 }
 /* events */
 $("#dock").innerHTML=[["home","Home","home"],["movie","Movies","movie"],["tv","TV","tv"],["search","Search","search"]].map(([r,l,i])=>`<button data-r="${r}" aria-label="${l}">${I(i)}<span>${l}</span></button>`).join("");
@@ -215,11 +254,16 @@ document.addEventListener("click",e=>{
   if(t.closest("#bk"))return S.pushes>0?(S.pushes--,history.back()):go("home");
   if(b=t.closest("[data-more]")){$("#ov").classList.remove("cl");b.remove();return}
   if(b=t.closest("[data-s]")){document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x===b));CUR.season=b.dataset.s;return eps(CUR.d.id,b.dataset.s)}
-  if(b=t.closest("[data-ep]")){S.dstate={id:CUR.d.id,s:CUR.season,y:scrollY};return go("episode",{id:CUR.d.id,s:b.dataset.sn,e:b.dataset.ep})}
+  if(b=t.closest("[data-ep]"))return go("episode",{id:CUR.d.id,s:b.dataset.sn,e:b.dataset.ep});
+  if(b=t.closest("[data-ca]"))return go("cast",JSON.parse(b.dataset.ca));
+  if(b=t.closest("[data-im]"))return go("images",JSON.parse(b.dataset.im));
+  if(b=t.closest("[data-p]"))return go("person",{id:b.dataset.p});
+  if(b=t.closest("[data-pf]")){document.querySelectorAll("[data-pf]").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll("#pg .cd").forEach(c=>c.hidden=c.dataset.o!==b.dataset.pf);return}
+  if(b=t.closest("[data-it]")){document.querySelectorAll("[data-it]").forEach(x=>x.classList.toggle("on",x===b));$("#ig").innerHTML=igHtml(window.IG[b.dataset.it]);return}
   if(b=t.closest("[data-mode]")){const r=S.route;S.mode[r]=b.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",x===b));const c=$(".chips"),y=c.getBoundingClientRect().top+scrollY-70;if(scrollY>y)scrollTo(0,y);return mount(r+":"+b.dataset.mode,fetcher(r,b.dataset.mode))}
-  if(b=t.closest("[data-o]")){if(H.sw&&b.id==="hero")return;go("detail",{type:b.dataset.o,id:b.dataset.id})}
+  if(b=t.closest("[data-o]")){if(H.sw&&b.id==="hero")return;delete S.ds[b.dataset.o+b.dataset.id];go("detail",{type:b.dataset.o,id:b.dataset.id})}
 });
-document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-o],[data-ep]")){e.preventDefault();e.target.click()}});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-o],[data-ep],[data-p]")){e.preventDefault();e.target.click()}});
 let qt;document.addEventListener("input",e=>{if(e.target.id!=="q")return;clearTimeout(qt);qt=setTimeout(()=>{const q=e.target.value.trim();history.replaceState({r:"search",p:{q}},"","#search"+(q?"/"+encodeURIComponent(JSON.stringify({q})):""));if(q.length>1)runSearch(q);else{io&&io.disconnect();cur=null;$("#grid").innerHTML="";$("#sent").innerHTML='<p class="end">Type a title to search movies and TV shows together.</p>'}},350)});
 addEventListener("popstate",()=>{const x=parse();render(x.r,x.p)});
 history.scrollRestoration="manual";
