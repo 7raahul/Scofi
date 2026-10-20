@@ -130,6 +130,15 @@ body.dt .main{padding-top:0}
 @media(min-width:1280px){
 .dgrid>.sec:nth-child(3){grid-column:1;grid-row:2;justify-self:end;align-self:center}.dgrid>.sec:nth-child(2){grid-row:3}
 }
+.pfs{margin-top:18px;min-height:132px}.pfh{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}.pfh h2{font-size:17px;font-weight:800;letter-spacing:-.3px}
+#rg{background:var(--p);color:var(--tx);border:1px solid var(--ln);border-radius:99px;padding:7px 14px;font:inherit;font-size:13px;font-weight:600;outline:none;cursor:pointer}#rg:focus{border-color:var(--ac)}
+.prow{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.prow::-webkit-scrollbar{display:none}
+.pt{flex:0 0 76px;background:none;border:0;padding:0;display:grid;justify-items:center;gap:7px;color:var(--mu);font-size:12px;font-weight:700}.pt:hover{color:var(--tx)}
+.pt img{width:64px;height:64px;border-radius:18px;object-fit:cover;background:var(--p);border:1px solid var(--ln);transition:transform .2s,border-color .2s}.pt:hover img{transform:translateY(-3px);border-color:var(--ac)}
+.plg{width:34px;height:34px;border-radius:9px;margin-right:12px}.bar2 .ph{display:flex;align-items:center}
+.wg{margin-bottom:16px}.wg small{display:block;color:var(--mu);font-weight:700;margin-bottom:8px}.wr{display:flex;flex-wrap:wrap;gap:10px}
+.wp{display:flex;align-items:center;gap:10px;padding:7px 16px 7px 7px;border-radius:14px;background:var(--p);border:1px solid var(--ln);font-weight:700;font-size:13.5px;transition:border-color .2s}.wp:hover{border-color:var(--ac)}.wp img{width:36px;height:36px;border-radius:9px;object-fit:cover}
+@media(min-width:1024px){.pt{flex-basis:92px}.pt img{width:76px;height:76px;border-radius:20px}.prow{gap:20px;margin:0;padding:0}}
 </style>
 </head>
 <body>
@@ -148,6 +157,8 @@ const ttl=x=>x.title||x.name||"Untitled",mdt=x=>x.release_date||x.first_air_date
 const dstr=v=>{if(!v)return"TBA";const d=new Date(v+"T12:00:00");return isNaN(d)?"TBA":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})};
 const S={cache:new Map(),route:"",pushes:0,ds:{},mode:{home:"trending",movie:"popular",tv:"popular",search:"trending"},logos:new Map()};
 const H={items:[],i:0,timer:0,tok:0,sw:false},feeds={};let cur=null,io=null;
+const REGIONS=[["IN","India"],["US","United States"],["GB","United Kingdom"]];
+S.region=(()=>{try{const r=localStorage.getItem("scofi-region");return REGIONS.some(x=>x[0]===r)?r:"IN"}catch{return"IN"}})();
 async function api(path,q={}){const k=path+"?"+new URLSearchParams(q);if(S.cache.has(k))return S.cache.get(k);const u=new URL(API+path);u.searchParams.set("api_key",KEY);for(const[a,b]of Object.entries(q))if(b!=null&&b!=="")u.searchParams.set(a,b);const r=await fetch(u);if(!r.ok){let m="TMDB request failed ("+r.status+")";try{m=(await r.json()).status_message||m}catch{}throw Error(m)}const d=await r.json();S.cache.set(k,d);return d}
 const err=e=>`<div class="err"><b>Couldn’t load TMDB data.</b><p>${esc(e.message)}</p><p>Check your connection and API key, then try again.</p></div>`;
 /* cards */
@@ -180,8 +191,8 @@ function mount(key,fetch){
 }
 function feedPage(route,pre=""){
   const m=S.mode[route],lab={fresh:route==="tv"?"On air":route==="movie"?"In theatres":"New"};
-  $("#m").innerHTML=`${pre}<div class="chips">${[["trending","Trending"],["popular","Popular"],["top","Top rated"],["fresh","New"]].map(([k,l])=>`<button class="chip${k===m?" on":""}" data-mode="${k}">${lab[k]||l}</button>`).join("")}</div><div id="grid" class="grid"></div><div id="sent"></div>`;
-  mount(route+":"+m,fetcher(route,m));
+  $("#m").innerHTML=`${pre}<section class="pfs" id="pf"></section><div class="chips">${[["trending","Trending"],["popular","Popular"],["top","Top rated"],["fresh","New"]].map(([k,l])=>`<button class="chip${k===m?" on":""}" data-mode="${k}">${lab[k]||l}</button>`).join("")}</div><div id="grid" class="grid"></div><div id="sent"></div>`;
+  mount(route+":"+m,fetcher(route,m));loadPlat();
 }
 /* hero */
 async function logo(it){const k=mt(it)+it.id;if(S.logos.has(k))return S.logos.get(k);let r=null;try{const d=await api(`/${mt(it)}/${it.id}/images`);const l=(d.logos||[]).filter(x=>x.file_path).sort((a,b)=>((a.iso_639_1==="en"?0:a.iso_639_1?2:1)-(b.iso_639_1==="en"?0:b.iso_639_1?2:1))||(b.vote_average||0)-(a.vote_average||0))[0];if(l)r=img(l.file_path,"w500")}catch{}S.logos.set(k,r);return r}
@@ -216,7 +227,7 @@ const runSearch=q=>mount("s:"+q,async p=>{const d=await api("/search/multi",{que
 async function detail(type,id){
   const m=$("#m");m.innerHTML='<div class="dh"></div>';
   try{
-    const d=await api(`/${type}/${id}`,{language:"en-US",append_to_response:"credits,recommendations"});
+    const d=await api(`/${type}/${id}`,{language:"en-US",append_to_response:"credits,recommendations,watch/providers"});
     const t=ttl(d),dt=type==="movie"?d.release_date:d.first_air_date,rt=type==="movie"?d.runtime:(d.episode_run_time||[])[0];
         const cast=(d.credits?.cast||[]),rec=(d.recommendations?.results||[]).filter(x=>x.poster_path).slice(0,14).map(x=>({...x,media_type:type}));
     const seasons=(d.seasons||[]).filter(s=>s.season_number>0),long=(d.overview||"").length>190;
@@ -225,7 +236,7 @@ async function detail(type,id){
 <div class="dgrid"><div class="dtop"><img class="dp" data-full="${d.poster_path||""}" src="${img(d.poster_path)}" alt="${esc(t)} poster" onerror="this.src=PH"><div><div id="dl"><h1>${esc(t)}</h1></div><p class="sub">${yr(dt)}${rt?" · "+rt+" min":""} · ${type==="movie"?"Movie":"TV series"}</p></div></div>
 <div class="sec"><h2>Overview</h2>${d.tagline?`<p class="sub" style="margin-bottom:8px">${esc(d.tagline)}</p>`:""}<p class="ov${long?" cl":""}" id="ov">${esc(d.overview||"No overview available yet.")}</p>${long?'<button class="lnk" data-more>Read more</button>':""}</div>
 <div class="sec"><div class="facts"><div class="fact" data-md="${esc(JSON.stringify({t:type,id:d.id}))}" role="button" tabindex="0"><small>Media</small><b style="color:var(--ac)">View all</b></div><div class="fact"><small>${type==="movie"?"Released":"First aired"}</small><b>${dstr(dt)}</b></div><div class="fact"><small>Language</small><b>${(d.original_language||"—").toUpperCase()}</b></div><div class="fact"><small>${type==="tv"?"Seasons":"Runtime"}</small><b>${type==="tv"?`${d.number_of_seasons||0} · ${d.number_of_episodes||0} eps`:rt?rt+" min":"—"}</b></div></div></div></div></div>
-${castSec(cast,{t:type,id:d.id})}
+${wtw(d)}${castSec(cast,{t:type,id:d.id})}
 ${type==="tv"&&seasons.length?`<div class="sec"><h2>Episodes</h2><div class="chips" id="ss" style="margin-top:0">${seasons.map((s,i)=>`<button class="chip${i?"":" on"}" data-s="${s.season_number}">${esc(s.name)}</button>`).join("")}</div><div id="eps"></div></div>`:""}
 ${rec.length?`<div class="sec"><h2>More like this</h2>${rw(`<div class="row">${rec.map(card).join("")}</div>`)}</div>`:""}`;
     logo({id:d.id,media_type:type}).then(u=>{if(!u)return;const i=new Image();i.className="dlogo";i.alt=t;i.onload=()=>{const b=$("#dl");if(b&&window.CUR&&CUR.d===d)b.replaceChildren(i)};i.src=u});const st=S.ds[type+d.id];delete S.ds[type+d.id];if(type==="tv"&&seasons.length){const s0=st&&seasons.some(x=>x.season_number==st.s)?st.s:seasons[0].season_number;if(st)document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==s0));CUR.season=s0;eps(d.id,s0).then(()=>st&&scrollTo(0,st.y))}else if(st)scrollTo(0,st.y);
@@ -298,6 +309,32 @@ async function media(t,id){
     m.innerHTML=bar("Media")+(T.length?`<div class="chips" style="margin-top:0">${T.map((x,i)=>`<button class="chip${i?"":" on"}" data-it="${i}">${x[0]} (${x[1].length})</button>`).join("")}</div><div id="ig">${igHtml(T[0])}</div>`:'<p class="end">No images available for this title yet.</p>');
   }catch(x){m.innerHTML=bar("Media")+err(x)}
 }
+const TG=[["Netflix",/^netflix$/i],["Prime Video",/^(amazon )?prime video$/i],["JioHotstar",/hotstar/i],["ZEE5",/^zee\s?5$/i],["SonyLIV",/^sony\s?liv$/i],["HBO Max",/^(hbo )?max$/i],["Peacock",/^peacock( premium)?$/i],["Apple TV",/^apple tv\s?(\+|plus)$/i]];
+const rgName=c=>(REGIONS.find(x=>x[0]===c)||[0,c])[1];
+async function provs(region){const rs=await Promise.all(["movie","tv"].map(k=>api(`/watch/providers/${k}`,{watch_region:region,language:"en-US"})));const m=new Map();rs.forEach(a=>(a.results||[]).forEach(p=>{if(!m.has(p.provider_id))m.set(p.provider_id,p)}));return[...m.values()]}
+async function platList(){
+  const r=S.region,[cur,us]=await Promise.all([provs(r),r==="US"?[]:provs("US")]);
+  return TG.map(([n,re])=>{const f=(l,rg)=>l.filter(p=>re.test(p.provider_name)).sort((a,b)=>(a.display_priorities?.[rg]??999)-(b.display_priorities?.[rg]??999))[0],p=f(cur,r);if(p)return{n,id:p.provider_id,l:p.logo_path,r};const q=f(us,"US");return q?{n,id:q.provider_id,l:q.logo_path,r:"US"}:null}).filter(Boolean);
+}
+const rgSel=()=>`<select id="rg" aria-label="Region">${REGIONS.map(([c,n])=>`<option value="${c}"${c===S.region?" selected":""}>${n}</option>`).join("")}</select>`;
+async function loadPlat(){
+  const el=$("#pf");if(!el)return;
+  try{const L=await platList(),e=$("#pf");if(!e)return;
+    e.innerHTML=`<div class="pfh"><h2>Streaming platforms</h2>${rgSel()}</div><div class="prow">${L.map(p=>`<button class="pt" data-pl="${esc(JSON.stringify({id:p.id,n:p.n,l:p.l,r:p.r}))}"><img loading="lazy" src="${esc(img(p.l,"w92"))}" alt=""><span>${esc(p.n)}</span></button>`).join("")}</div>`;
+  }catch{el.innerHTML="";el.style.minHeight="0"}
+}
+const plMount=(p,k)=>mount(`pl:${p.id}:${p.r}:${k}`,async n=>{const d=await api(`/discover/${k}`,{with_watch_providers:p.id,watch_region:p.r,with_watch_monetization_types:"flatrate|free|ads",sort_by:"popularity.desc",language:"en-US",page:n});return{items:d.results.map(x=>({...x,media_type:k})),more:n<Math.min(d.total_pages,500)}});
+function platform(p){
+  p={id:+p.id||0,n:String(p.n||"Platform").slice(0,40),l:/^\/[\w.-]+$/.test(p.l||"")?p.l:null,r:/^[A-Z]{2}$/.test(p.r||"")?p.r:"IN"};window.PL=p;
+  const note=p.r!==S.region?`Showing the ${esc(rgName(p.r))} catalogue (not available in ${esc(rgName(S.region))}) · Data by JustWatch`:`${esc(rgName(p.r))} · Data by JustWatch`;
+  $("#m").innerHTML=bar(`<img class="plg" src="${esc(img(p.l,"w92"))}" alt="">${esc(p.n)}`,note)+'<div class="chips"><button class="chip on" data-pk="movie">Movies</button><button class="chip" data-pk="tv">TV Shows</button></div><div id="grid" class="grid"></div><div id="sent"></div>';
+  plMount(p,"movie");
+}
+function wtw(d){
+  const r=d["watch/providers"]?.results?.[S.region]||{},seen=new Set(),u=l=>(l||[]).filter(p=>!seen.has(p.provider_id)&&seen.add(p.provider_id));
+  const G=[["Stream",u(r.flatrate)],["Free with ads",u([...(r.free||[]),...(r.ads||[])])],["Rent",u(r.rent)],["Buy",u(r.buy)]].filter(g=>g[1].length),link=/^https:\/\//.test(r.link||"")?r.link:"https://www.themoviedb.org";
+  return `<div class="sec"><div class="sh"><h2>Where to watch</h2>${rgSel()}</div>${G.length?G.map(([t,l])=>`<div class="wg"><small>${t}</small><div class="wr">${l.map(p=>`<a class="wp" href="${esc(link)}" target="_blank" rel="noopener" title="${esc(p.provider_name)}"><img loading="lazy" src="${esc(img(p.logo_path,"w92"))}" alt=""><span>${esc(p.provider_name)}</span></a>`).join("")}</div></div>`).join(""):`<p class="sub">Not available to stream, rent or buy in ${esc(rgName(S.region))} right now. Try another region.</p>`}<p class="sub" style="margin-top:12px">Availability data by JustWatch</p></div>`;
+}
 /* router */
 function parse(){const r=location.hash.replace(/^#/,"");if(!r)return{r:"home",p:{}};const i=r.indexOf("/");if(i<0)return{r,p:{}};try{return{r:r.slice(0,i),p:JSON.parse(decodeURIComponent(r.slice(i+1)))}}catch{return{r:r.slice(0,i),p:{}}}}
 function go(r,p={},rep){
@@ -313,7 +350,7 @@ function render(r,p={}){
   document.querySelectorAll("#dock button").forEach(b=>b.classList.toggle("on",b.dataset.r===(r==="detail"?p.type:r==="episode"?"tv":r)));
   if(!["home","movie","tv"].includes(r))scrollTo(0,0);
   if(r==="home")home();else if(r==="movie"||r==="tv")feedPage(r,`<h1 class="ph">${r==="movie"?"Movies":"TV Shows"}</h1>`);
-  else if(r==="search")search(p.q||"");else if(r==="detail")detail(p.type||"movie",p.id);else if(r==="episode")episode(p.id,p.s,p.e);else if(r==="cast")castPage(p);else if(r==="person")person(p.id);else if(r==="images")images(p.id,p.s,p.e);else if(r==="media")media(p.t,p.id);else go("home",{},true);
+  else if(r==="search")search(p.q||"");else if(r==="detail")detail(p.type||"movie",p.id);else if(r==="episode")episode(p.id,p.s,p.e);else if(r==="cast")castPage(p);else if(r==="person")person(p.id);else if(r==="images")images(p.id,p.s,p.e);else if(r==="media")media(p.t,p.id);else if(r==="platform")platform(p);else go("home",{},true);
 }
 /* events */
 $("#dock").innerHTML=[["home","Home","home"],["movie","Movies","movie"],["tv","TV","tv"],["search","Search","search"]].map(([r,l,i])=>`<button data-r="${r}" aria-label="${l}">${I(i)}<span>${l}</span></button>`).join("");
@@ -330,6 +367,8 @@ document.addEventListener("click",e=>{
   if(t.closest("#qx")){const i=$("#q");i.value="";i.focus();return onQ("")}
   if((b=t.closest("[data-full]"))&&b.dataset.full)return openLB(b.dataset.full,b);
   if(b=t.closest("[data-md]"))return go("media",JSON.parse(b.dataset.md));
+  if(b=t.closest("[data-pl]"))return go("platform",JSON.parse(b.dataset.pl));
+  if(b=t.closest("[data-pk]")){document.querySelectorAll("[data-pk]").forEach(x=>x.classList.toggle("on",x===b));return plMount(window.PL,b.dataset.pk)}
   if(b=t.closest("[data-hs]")){showHero(+b.dataset.hs);return tick()}
   if(b=t.closest("[data-rs]")){const r=b.parentElement.querySelector(".row");r.scrollBy({left:b.dataset.rs*r.clientWidth*.8,behavior:"smooth"});return}
   if(b=t.closest("[data-more]")){$("#ov").classList.remove("cl");b.remove();return}
@@ -347,7 +386,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#lb").hidden)re
 let qt;const onQ=v=>{clearTimeout(qt);$("#qx").hidden=!v;qt=setTimeout(()=>{const q=v.trim();history.replaceState({r:"search",p:{q}},"","#search"+(q?"/"+encodeURIComponent(JSON.stringify({q})):""));if(q.length>1){$("#sc").hidden=true;runSearch(q)}else{$("#sc").hidden=false;browse()}},350)};
 document.addEventListener("input",e=>{if(e.target.id==="q")onQ(e.target.value)});
 addEventListener("popstate",()=>{if(S.skip){S.skip=false;return}if(!$("#lb").hidden){lbSet(false);return}const x=parse();render(x.r,x.p)});
-addEventListener("scroll",()=>{$("#up").hidden=scrollY<900},{passive:true});history.scrollRestoration="manual";
+addEventListener("scroll",()=>{$("#up").hidden=scrollY<900},{passive:true});document.addEventListener("change",e=>{if(e.target.id!=="rg")return;S.region=e.target.value;try{localStorage.setItem("scofi-region",S.region)}catch{}const x=parse();if(x.r==="detail")render(x.r,x.p);else loadPlat()});
+history.scrollRestoration="manual";
 const first=parse();if(!location.hash)history.replaceState({r:"home",p:{}},"",location.pathname+location.search+"#home");render(first.r,first.p);
 </script>
 </body>
