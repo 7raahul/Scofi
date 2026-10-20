@@ -83,6 +83,7 @@ body.dt .main{padding-top:0}
 #bk{width:auto;height:40px;padding:0 16px 0 10px;gap:2px;border-radius:99px;font-weight:700;font-size:14px;background:linear-gradient(180deg,#ffffff2e,#ffffff12),#0c0d14a6;border:1px solid #ffffff38;box-shadow:inset 0 1px 0 #ffffff40,0 6px 20px #0007;display:inline-flex;align-items:center}#bk svg{width:20px;height:20px}
 .pf{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}.pf>div{background:var(--p);border:1px solid var(--ln);border-radius:14px;padding:9px 14px}.pf small{display:block;color:var(--mu);font-size:11.5px}.pf b{font-size:14px}
 .pl .dp{width:min(52vw,230px)}.pn{margin:18px 0 0}
+.dh>img,.dgrid .dp{transition:opacity .3s}
 .dh:empty{background:linear-gradient(90deg,var(--p),var(--p2),var(--p));background-size:200% 100%;animation:sh 1.3s infinite}
 .up{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:55}
 @media(min-width:1024px){
@@ -239,7 +240,7 @@ async function detail(type,id){
 ${wtw(d)}${castSec(cast,{t:type,id:d.id})}
 ${type==="tv"&&seasons.length?`<div class="sec"><h2>Episodes</h2><div class="chips" id="ss" style="margin-top:0">${seasons.map((s,i)=>`<button class="chip${i?"":" on"}" data-s="${s.season_number}">${esc(s.name)}</button>`).join("")}</div><div id="eps"></div></div>`:""}
 ${rec.length?`<div class="sec"><h2>More like this</h2>${rw(`<div class="row">${rec.map(card).join("")}</div>`)}</div>`:""}`;
-    logo({id:d.id,media_type:type}).then(u=>{if(!u)return;const i=new Image();i.className="dlogo";i.alt=t;i.onload=()=>{const b=$("#dl");if(b&&window.CUR&&CUR.d===d)b.replaceChildren(i)};i.src=u});const st=S.ds[type+d.id];delete S.ds[type+d.id];if(type==="tv"&&seasons.length){const s0=st&&seasons.some(x=>x.season_number==st.s)?st.s:seasons[0].season_number;if(st)document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==s0));CUR.season=s0;eps(d.id,s0).then(()=>st&&scrollTo(0,st.y))}else if(st)scrollTo(0,st.y);
+    logo({id:d.id,media_type:type}).then(u=>{if(!u)return;const i=new Image();i.className="dlogo";i.alt=t;i.onload=()=>{const b=$("#dl");if(b&&window.CUR&&CUR.d===d)b.replaceChildren(i)};i.src=u});slide(type,d);const st=S.ds[type+d.id];delete S.ds[type+d.id];if(type==="tv"&&seasons.length){const s0=st&&seasons.some(x=>x.season_number==st.s)?st.s:seasons[0].season_number;if(st)document.querySelectorAll("[data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==s0));CUR.season=s0;eps(d.id,s0).then(()=>st&&scrollTo(0,st.y))}else if(st)scrollTo(0,st.y);
   }catch(e){m.innerHTML=`<div style="padding-top:calc(20px + env(safe-area-inset-top))"><button class="gl" id="bk" aria-label="Back" style="margin-bottom:16px">${I("back")}<span>Back</span></button>${err(e)}</div>`}
 }
 async function eps(id,n){const b=$("#eps");b.innerHTML='<p class="end">Loading episodes…</p>';try{const d=await api(`/tv/${id}/season/${n}`,{language:"en-US"});if($("#eps")!==b)return;b.innerHTML=d.episodes?.length?d.episodes.map(e=>`<article class="ep" tabindex="0" role="button" data-ep="${e.episode_number}" data-sn="${n}"><img loading="lazy" src="${img(e.still_path,"w300")}" alt="" onerror="this.src=PH"><div><h4>${e.episode_number}. ${esc(e.name||"Untitled episode")}</h4><p class="sub">${dstr(e.air_date)}${e.runtime?" · "+e.runtime+" min":""} · ${rate(e.vote_average)}</p><p>${esc(e.overview||"No description available.")}</p></div></article>`).join(""):'<p class="end">No episode details for this season yet.</p>'}catch(e){b.innerHTML=err(e)}}
@@ -335,6 +336,30 @@ function wtw(d){
   const G=[["Stream",u(r.flatrate)],["Free with ads",u([...(r.free||[]),...(r.ads||[])])],["Rent",u(r.rent)],["Buy",u(r.buy)]].filter(g=>g[1].length),link=/^https:\/\//.test(r.link||"")?r.link:"https://www.themoviedb.org";
   return `<div class="sec"><div class="sh"><h2>Where to watch</h2>${rgSel()}</div>${G.length?G.map(([t,l])=>`<div class="wg"><small>${t}</small><div class="wr">${l.map(p=>`<a class="wp" href="${esc(link)}" target="_blank" rel="noopener" title="${esc(p.provider_name)}"><img loading="lazy" src="${esc(img(p.logo_path,"w92"))}" alt=""><span>${esc(p.provider_name)}</span></a>`).join("")}</div></div>`).join(""):`<p class="sub">Not available to stream, rent or buy in ${esc(rgName(S.region))} right now. Try another region.</p>`}<p class="sub" style="margin-top:12px">Availability data by JustWatch</p></div>`;
 }
+let SL=0;
+async function slide(t,d){
+  clearInterval(SL);
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const dh=$(".dh"),dp=$(".dgrid .dp");if(!dh)return;
+  try{
+    const g=await api(`/${t}/${d.id}/images`,{include_image_language:"en,null"});
+    if($(".dh")!==dh)return;
+    const top=l=>[...(l||[])].filter(x=>x.file_path).sort((a,b)=>(b.vote_average||0)-(a.vote_average||0)).slice(0,8).map(x=>x.file_path),
+      mk=(first,l)=>first?[first,...top(l).filter(x=>x!==first)]:top(l);
+    const B=mk(d.backdrop_path||d.poster_path,g.backdrops),P=mk(d.poster_path,g.posters);
+    if(B.length<2&&P.length<2)return;
+    const bi=dh.querySelector("img");let i=0,pause=false;
+    const swap=(el,p,sz)=>{if(!el||!p)return;const n=new Image();n.onload=()=>{el.style.opacity=0;setTimeout(()=>{el.src=n.src;el.style.opacity=1},300)};n.src=IMG+sz+p};
+    if(matchMedia("(hover:hover)").matches)[dh,dp].forEach(e=>{if(e){e.addEventListener("mouseenter",()=>pause=true);e.addEventListener("mouseleave",()=>pause=false)}});
+    SL=setInterval(()=>{
+      if(!document.contains(dh)){clearInterval(SL);return}
+      if(pause||document.hidden||!$("#lb").hidden)return;
+      i++;
+      if(B.length>1){const p=B[i%B.length];dh.dataset.full=p;swap(bi,p,"w1280")}
+      if(P.length>1&&dp){const p=P[i%P.length];dp.dataset.full=p;swap(dp,p,"w500")}
+    },3000);
+  }catch{}
+}
 /* router */
 function parse(){const r=location.hash.replace(/^#/,"");if(!r)return{r:"home",p:{}};const i=r.indexOf("/");if(i<0)return{r,p:{}};try{return{r:r.slice(0,i),p:JSON.parse(decodeURIComponent(r.slice(i+1)))}}catch{return{r:r.slice(0,i),p:{}}}}
 function go(r,p={},rep){
@@ -345,7 +370,7 @@ function go(r,p={},rep){
   render(r,p);
 }
 function render(r,p={}){
-  clearInterval(H.timer);io&&io.disconnect();cur=null;S.route=r;
+  clearInterval(H.timer);clearInterval(SL);io&&io.disconnect();cur=null;S.route=r;
   document.body.classList.toggle("dt",r==="detail"||r==="episode");
   document.querySelectorAll("#dock button").forEach(b=>b.classList.toggle("on",b.dataset.r===(r==="detail"?p.type:r==="episode"?"tv":r)));
   if(!["home","movie","tv"].includes(r))scrollTo(0,0);
