@@ -163,6 +163,8 @@ body.dt .dh:after{background:linear-gradient(0deg,var(--bg),transparent 55%),lin
 body.dt .mini{background:#141416e6}
 .dgrid .dtop>div{padding-bottom:28px}
 }
+.pgal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(min-width:620px){.pgal{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}}
+.pgal img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;background:var(--p);cursor:zoom-in;opacity:0;filter:blur(12px);transition:opacity .4s,filter .5s}.pgal img.ld{opacity:1;filter:none}
 </style>
 </head>
 <body>
@@ -300,14 +302,16 @@ async function castPage(p){
 async function person(id){
   const m=$("#m");m.innerHTML=bar("Profile")+'<p class="end">Loading profile…</p>';
   try{
-    const d=await api(`/person/${id}`,{language:"en-US",append_to_response:"combined_credits"}),cc=d.combined_credits||{},seen=new Set();
+    const d=await api(`/person/${id}`,{language:"en-US",append_to_response:"combined_credits,images"}),cc=d.combined_credits||{},seen=new Set();
     let L=cc.cast||[];if(!L.length)L=cc.crew||[];
     L=L.filter(x=>x.poster_path&&["movie","tv"].includes(x.media_type)&&!seen.has(x.media_type+x.id)&&seen.add(x.media_type+x.id)).sort((a,b)=>(b.popularity||0)-(a.popularity||0));
     const nm=L.filter(x=>x.media_type==="movie").length,nt=L.length-nm,k0=nm||!nt?"movie":"tv";
     let age="";if(d.birthday){const[by,bm,bd]=d.birthday.split("-").map(Number),e=d.deathday?new Date(d.deathday+"T12:00:00"):new Date();let a=e.getFullYear()-by;if(e.getMonth()+1<bm||(e.getMonth()+1===bm&&e.getDate()<bd))a--;if(a>=0)age=a}
     const F=[["Born",d.birthday?dstr(d.birthday):""],d.deathday?["Died",dstr(d.deathday)+(age!==""?" (aged "+age+")":"")]:["Age",age!==""?age+" years":""],["Birthplace",d.place_of_birth],["Known for",d.known_for_department]].filter(f=>f[1]),long=(d.biography||"").length>240;
+    const P=[...new Map((d.images?.profiles||[]).filter(x=>x.file_path).map(x=>[x.file_path,x])).values()],photos=P.length>1?`<div class="sec"><div class="sh"><h2>Photos</h2><span class="sub">${P.length}</span></div><div class="pgal">${P.map(x=>`<img data-full="${x.file_path}" loading="lazy" src="${img(x.file_path,"w342")}" alt="" onerror="this.src=PH">`).join("")}</div></div>`:"";
     m.innerHTML=`${bar("Profile")}<div class="pgrid"><div class="pl"><img class="dp" data-full="${d.profile_path||""}" src="${img(d.profile_path,"w500")}" alt="${esc(d.name)}" onerror="this.src=PH"></div><div class="pr"><h1 class="eh pn">${esc(d.name)}</h1>${F.length?`<div class="pf">${F.map(f=>`<div><small>${f[0]}</small><b>${esc(f[1])}</b></div>`).join("")}</div>`:""}
 ${d.biography?`<div class="sec"><h2>Biography</h2><p class="ov${long?" cl":""}" id="ov" style="white-space:pre-line">${esc(d.biography)}</p>${long?'<button class="lnk" data-more>Read more</button>':""}</div>`:""}
+${photos}
 ${L.length?`<div class="sec"><h2>Filmography</h2><div class="chips" style="margin-top:0">${nm?`<button class="chip${k0==="movie"?" on":""}" data-pf="movie">Movies (${nm})</button>`:""}${nt?`<button class="chip${k0==="tv"?" on":""}" data-pf="tv">TV Shows (${nt})</button>`:""}</div><div class="grid" id="pg">${L.map(card).join("")}</div></div>`:""}</div></div>`;
     document.querySelectorAll("#pg .cd").forEach(c=>c.hidden=c.dataset.o!==k0);
   }catch(x){m.innerHTML=bar("Profile")+err(x)}
@@ -327,7 +331,7 @@ const lbSet=on=>{$("#lb").hidden=!on;document.body.style.overflow=on?"hidden":""
 let LB="";
 let LBL=[],LBi=0;
 function showLB(p){LB=p;const i=$("#lbi"),o=new Image();i.src=IMG+"w1280"+p;o.onload=()=>{if(LB===p)i.src=o.src};o.src=IMG+"original"+p}
-function openLB(p,el){LBL=[p];LBi=0;const c=el&&el.closest(".ig,.row,.grid");if(c){const l=[...c.querySelectorAll("[data-full]")].map(x=>x.dataset.full).filter(Boolean),k=l.indexOf(p);if(k>=0){LBL=l;LBi=k}}showLB(p);lbSet(true);history.pushState({lb:1},"",location.href)}
+function openLB(p,el){LBL=[p];LBi=0;const c=el&&el.closest(".ig,.row,.grid,.pgal");if(c){const l=[...c.querySelectorAll("[data-full]")].map(x=>x.dataset.full).filter(Boolean),k=l.indexOf(p);if(k>=0){LBL=l;LBi=k}}showLB(p);lbSet(true);history.pushState({lb:1},"",location.href)}
 function closeLB(){if($("#lb").hidden)return;lbSet(false);S.skip=true;history.back()}
 async function dl(){const u=IMG+"original"+LB;try{const r=await fetch(u);if(!r.ok)throw 0;const a=document.createElement("a");a.href=URL.createObjectURL(await r.blob());a.download="scofi"+LB.replace("/","-");document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}catch{window.open(u,"_blank")}}
 async function media(t,id){
