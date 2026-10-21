@@ -169,10 +169,10 @@ body.dt .mini{background:#141416e6}
 .lbc{position:absolute;z-index:2;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);padding:5px 14px;border-radius:99px;background:#000a;font-size:13px;font-weight:700}
 .pf>div[data-pp]{cursor:pointer}
 @media(max-width:1023px){
-.pgrid{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 14px;align-items:start}.pr{display:contents}
+.pgrid{display:grid;grid-template-columns:150px minmax(0,1fr);grid-template-rows:auto 1fr;gap:0 14px;align-items:start}.pr{display:contents}
 .pl{grid-column:1;grid-row:1}.pl .dp{width:150px}
-.pf{grid-column:2;grid-row:1;flex-direction:column;flex-wrap:nowrap;gap:8px;margin:0}.pf>div{padding:8px 12px}
-.pn{grid-column:1/-1;grid-row:2;margin:16px 0 0}.pr>.sec{grid-column:1/-1}
+.pf{grid-column:2;grid-row:1/span 2;flex-direction:column;flex-wrap:nowrap;gap:8px;margin:0}.pf>div{padding:8px 12px}
+.pn{grid-column:1;grid-row:2;margin:12px 0 0;font-size:22px;line-height:1.15}.pr>.sec{grid-column:1/-1}
 }
 </style>
 </head>
