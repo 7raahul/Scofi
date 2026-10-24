@@ -174,6 +174,18 @@ body.dt .mini{background:#141416e6}
 .pf{grid-column:2;grid-row:1;flex-direction:column;flex-wrap:nowrap;gap:6px;margin:0}.pf>div{padding:6px 11px}.pf small{font-size:11px}.pf b{font-size:13px}
 .pn{grid-column:1;grid-row:1;align-self:end;z-index:2;margin:0;padding:34px 12px 12px;font-size:18px;line-height:1.15;border-radius:0 0 14px 14px;background:linear-gradient(0deg,#07080de6,transparent);pointer-events:none}.pr>.sec{grid-column:1/-1}
 }
+#dbk,.dsep{display:none}
+@media(min-width:1024px){
+.dock{left:14px;width:46px;padding:5px;gap:4px;background:linear-gradient(180deg,#ffffff1c,#ffffff08),#101118cc}
+.dock button{width:36px;height:36px}.dock svg{width:20px;height:20px;transition:transform .2s}.dock button:hover svg{transform:scale(1.12)}
+.dock button.on{background:#ffffff1f;box-shadow:inset 0 1px 0 #ffffff40,0 0 18px #9b7bff44}
+.dock button.on::before{content:"";position:absolute;left:-9px;top:9px;bottom:9px;width:3px;border-radius:3px;background:var(--ac)}
+#dbk{display:grid}#dbk:not([hidden])+.dsep{display:block;width:20px;height:1px;background:#ffffff2e;margin:2px auto}
+.main,body.dt .main{margin-left:100px}.mini{padding-left:96px}
+#bk,.bkrow{display:none}
+.dpage{max-width:max(640px,calc((100vh - 150px)*2.4444 + 24px))}
+.flt{margin-bottom:22px}
+}
 </style>
 </head>
 <body>
@@ -268,10 +280,10 @@ async function detail(type,id){
         const cast=(d.credits?.cast||[]),rec=(d.recommendations?.results||[]).filter(x=>x.poster_path).slice(0,14).map(x=>({...x,media_type:type}));
     const seasons=(d.seasons||[]).filter(s=>s.season_number>0),long=(d.overview||"").length>190;
     window.CUR={d,type};
-    const box=a=>`<div class="fact"><small>${a[0]}</small><b>${esc(a[1])}</b></div>`,
+    const cn=(d.production_countries||[]).slice(0,2).map(c=>(COUNTRIES.find(x=>x[0]===c.iso_3166_1)||[0,c.name])[1]).join(", "),box=a=>`<div class="fact"><small>${a[0]}</small><b>${esc(a[1])}</b></div>`,
       med=`<div class="fact" data-md="${esc(JSON.stringify({t:type,id:d.id}))}" role="button" tabindex="0"><small>Media</small><b style="color:var(--ac)">View all</b></div>`,
       tail=type==="movie"?[["Budget",money(d.budget)],["Revenue",money(d.revenue)]].filter(x=>x[1]):[["Seasons",`${d.number_of_seasons||0} · ${d.number_of_episodes||0} eps`]],
-      facts=[[type==="movie"?"Released":"First aired",dstr(dt)],...(type==="movie"?[["Runtime",rt?rt+" min":"—"]]:[]),["Language",(d.original_language||"—").toUpperCase()]].map(box).join("")+med+tail.map(box).join("");
+      facts=[[type==="movie"?"Released":"First aired",dstr(dt)],...(type==="movie"?[["Runtime",rt?rt+" min":"—"]]:[]),["Language",(d.original_language||"—").toUpperCase()],...(cn?[["Country",cn]]:[])].map(box).join("")+med+tail.map(box).join("");
     m.innerHTML=`<div class="bkrow"><button class="gl" id="bk" aria-label="Back">${I("back")}<span>Back</span></button></div><div class="dpage"><div class="dh" data-full="${d.backdrop_path||d.poster_path||""}"><img src="${img(d.backdrop_path||d.poster_path,"w1280")}" alt="" onerror="this.style.display='none'"><div class="dlg" id="dl2"><h1>${esc(t)}</h1></div><div class="dr"><span class="pill y">${rate(d.vote_average)}</span>${d.vote_count?`<span class="pill v">${d.vote_count.toLocaleString()} votes</span>`:""}</div></div>
 <div class="dgrid"><div class="dtop"><img class="dp" data-full="${d.poster_path||""}" src="${img(d.poster_path)}" alt="${esc(t)} poster" onerror="this.src=PH"><div><div id="dl"><h1>${esc(t)}</h1></div></div></div>
 <div class="sec"><h2>Overview</h2>${d.tagline?`<p class="sub" style="margin-bottom:8px">${esc(d.tagline)}</p>`:""}<p class="ov${long?" cl":""}" id="ov">${esc(d.overview||"No overview available yet.")}</p>${long?'<button class="lnk" data-more>Read more</button>':""}</div>
@@ -389,21 +401,22 @@ async function slide(t,d){
     },3000);
   }catch{}
 }
-S.flt={movie:{sort:"",year:""},tv:{sort:"",year:""}};
-const fltOn=r=>S.flt[r]&&(S.flt[r].sort||S.flt[r].year);
-const fltHtml=r=>{const f=S.flt[r],ys=[];for(let y=new Date().getFullYear();y>=1950;y--)ys.push(y);return `<div class="flt"><select id="fs" aria-label="Sort">${[["","Sort: Default"],["pop","Most popular"],["rate","Top rated"],["new","Newest"],["old","Oldest"]].map(([v,l])=>`<option value="${v}"${v===f.sort?" selected":""}>${l}</option>`).join("")}</select><select id="fy" aria-label="Year"><option value="">All years</option>${ys.map(y=>`<option value="${y}"${String(y)===f.year?" selected":""}>${y}</option>`).join("")}</select></div>`};
+const COUNTRIES=[["IN","India"],["US","United States"],["GB","United Kingdom"],["KR","South Korea"],["JP","Japan"],["CN","China"],["HK","Hong Kong"],["TW","Taiwan"],["TH","Thailand"],["FR","France"],["DE","Germany"],["ES","Spain"],["IT","Italy"],["TR","Turkey"],["RU","Russia"],["BR","Brazil"],["MX","Mexico"],["CA","Canada"],["AU","Australia"],["ID","Indonesia"]],LANGS=[["hi","Hindi"],["ta","Tamil"],["te","Telugu"],["ml","Malayalam"],["kn","Kannada"],["bn","Bengali"],["mr","Marathi"],["pa","Punjabi"],["en","English"]];
+S.flt={movie:{sort:"",year:"",country:"",lang:""},tv:{sort:"",year:"",country:"",lang:""}};
+const fltOn=r=>S.flt[r]&&(S.flt[r].sort||S.flt[r].year||S.flt[r].country||S.flt[r].lang);
+const fltHtml=r=>{const f=S.flt[r],ys=[];for(let y=new Date().getFullYear();y>=1950;y--)ys.push(y);const o=(l,v,sel)=>`<option value="${v}"${sel?" selected":""}>${l}</option>`;return `<div class="flt"><select id="fs" aria-label="Sort">${[["","Sort: Default"],["pop","Most popular"],["rate","Top rated"],["new","Newest"],["old","Oldest"]].map(([v,l])=>o(l,v,v===f.sort)).join("")}</select><select id="fy" aria-label="Year">${o("All years","",!f.year)}${ys.map(y=>o(y,y,String(y)===f.year)).join("")}</select><select id="fc" aria-label="Country">${o("All countries","",!f.country)}${COUNTRIES.map(([c,n])=>o(n,c,c===f.country)).join("")}</select><select id="fl" aria-label="Language"${f.country==="IN"?"":" hidden"}>${o("Any language","",!f.lang)}${LANGS.map(([c,n])=>o(n,c,c===f.lang)).join("")}</select></div>`};
 const dfetch=(r,f)=>async p=>{const mv=r==="movie",dk=mv?"primary_release_date":"first_air_date",q={language:"en-US",page:p,include_adult:false};
   q.sort_by={pop:"popularity.desc",rate:"vote_average.desc",new:dk+".desc",old:dk+".asc"}[f.sort]||"popularity.desc";
   if(f.sort==="rate")q["vote_count.gte"]=mv?400:200;else if(f.sort==="new")q["vote_count.gte"]=15;else if(f.sort==="old")q["vote_count.gte"]=300;
   if(f.sort==="new"&&!f.year)q[dk+".lte"]=new Date().toISOString().slice(0,10);
-  if(f.year)q[mv?"primary_release_year":"first_air_date_year"]=f.year;
+  if(f.year)q[mv?"primary_release_year":"first_air_date_year"]=f.year;if(f.country)q.with_origin_country=f.country;if(f.lang)q.with_original_language=f.lang;
   const d=await api("/discover/"+r,q);return{items:d.results.map(x=>({...x,media_type:r})),more:p<Math.min(d.total_pages,500)}};
-const feedFor=r=>fltOn(r)?[`${r}:f:${S.flt[r].sort}:${S.flt[r].year}`,dfetch(r,S.flt[r])]:[r+":"+S.mode[r],fetcher(r,S.mode[r])];
-document.addEventListener("change",e=>{if(e.target.id!=="fs"&&e.target.id!=="fy")return;const r=S.route;S.flt[r]={sort:$("#fs").value,year:$("#fy").value};document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",!fltOn(r)&&x.dataset.mode===S.mode[r]));const[k,f]=feedFor(r);mount(k,f)});
+const feedFor=r=>fltOn(r)?[`${r}:f:${S.flt[r].sort}:${S.flt[r].year}:${S.flt[r].country}:${S.flt[r].lang}`,dfetch(r,S.flt[r])]:[r+":"+S.mode[r],fetcher(r,S.mode[r])];
+document.addEventListener("change",e=>{if(!["fs","fy","fc","fl"].includes(e.target.id))return;const r=S.route,c=$("#fc").value;if(e.target.id==="fc"&&c!=="IN")$("#fl").value="";$("#fl").hidden=c!=="IN";S.flt[r]={sort:$("#fs").value,year:$("#fy").value,country:c,lang:c==="IN"?$("#fl").value:""};document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",!fltOn(r)&&x.dataset.mode===S.mode[r]));const[k,f]=feedFor(r);mount(k,f)});
 const getRec=()=>{try{return JSON.parse(localStorage.getItem("scofi-recent")||"[]")}catch{return[]}};
 const saveRec=q=>{if(!q||q.length<2)return;try{localStorage.setItem("scofi-recent",JSON.stringify([q,...getRec().filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,8)))}catch{}};
 const recHtml=q=>{const l=getRec();return l.length&&!q?`<div class="rcs" id="rec"><small>Recent</small>${l.map(x=>`<button class="chip" data-rc="${esc(x)}">${esc(x)}</button>`).join("")}<button class="lnk" data-rcx>Clear</button></div>`:'<div class="rcs" id="rec" hidden></div>'};
-function navSet(r,p){const nv=r==="detail"?p.type:r==="episode"?"tv":r,ix=["home","movie","tv","search"].indexOf(nv),dk=$("#dock");dk.style.setProperty("--i",Math.max(ix,0));dk.classList.toggle("none",ix<0);dk.classList.remove("hide");$("#mini").hidden=true;document.body.style.removeProperty("--gl")}
+function navSet(r,p){const nv=r==="detail"?p.type:r==="episode"?"tv":r,ix=["home","movie","tv","search"].indexOf(nv),dk=$("#dock");dk.style.setProperty("--i",Math.max(ix,0));dk.classList.toggle("none",ix<0);dk.classList.remove("hide");$("#mini").hidden=true;$("#dbk").hidden=["home","movie","tv","search"].includes(r);document.body.style.removeProperty("--gl")}
 function glow(p){if(!p){document.body.style.removeProperty("--gl");return}const i=new Image();i.crossOrigin="anonymous";i.onload=()=>{try{const c=document.createElement("canvas");c.width=c.height=12;const x=c.getContext("2d");x.drawImage(i,0,0,12,12);const d=x.getImageData(0,0,12,12).data;let r=0,g=0,b=0,n=0;for(let k=0;k<d.length;k+=4){const l=(d[k]+d[k+1]+d[k+2])/3;if(l<30||l>235)continue;r+=d[k];g+=d[k+1];b+=d[k+2];n++}if(!n)return;r/=n;g/=n;b/=n;const k=110/Math.max(r,g,b,1);if(S.route==="detail")document.body.style.setProperty("--gl",[r,g,b].map(v=>Math.min(160,Math.round(v*k))).join(","))}catch{}};i.src=IMG+"w92"+p}
 document.addEventListener("load",e=>{if(e.target.tagName==="IMG")e.target.classList.add("ld")},true);
 let sw0=null;
@@ -434,14 +447,14 @@ function render(r,p={}){
   else if(r==="search")search(p.q||"");else if(r==="detail")detail(p.type||"movie",p.id);else if(r==="episode")episode(p.id,p.s,p.e);else if(r==="cast")castPage(p);else if(r==="person")person(p.id);else if(r==="images")images(p.id,p.s,p.e);else if(r==="media")media(p.t,p.id);else if(r==="pphotos")pphotos(p.id);else go("home",{},true);
 }
 /* events */
-$("#dock").innerHTML='<i class="dhl"></i>'+[["home","Home","home"],["movie","Movies","movie"],["tv","TV","tv"],["search","Search","search"]].map(([r,l,i])=>`<button data-r="${r}" aria-label="${l}">${I(i)}<span>${l}</span></button>`).join("");
+$("#dock").innerHTML='<i class="dhl"></i><button id="dbk" class="dbk" aria-label="Back" hidden>'+I("back")+'</button><i class="dsep"></i>'+[["home","Home","home"],["movie","Movies","movie"],["tv","TV","tv"],["search","Search","search"]].map(([r,l,i])=>`<button data-r="${r}" aria-label="${l}">${I(i)}<span>${l}</span></button>`).join("");
 document.addEventListener("click",e=>{
   const t=e.target;let b;
   if(b=t.closest("[data-r]"))return go(b.dataset.r);
   if(t.closest("#hp")){showHero(H.i-1);return tick()}
   if(t.closest("#hn")){showHero(H.i+1);return tick()}
   if(t.closest("#retry")){$("#sent").innerHTML=sk();return cur?.more?.()}
-  if(t.closest("#bk"))return S.pushes>0?(S.pushes--,history.back()):go("home");
+  if(t.closest("#bk,#dbk"))return S.pushes>0?(S.pushes--,history.back()):go("home");
   if(t.closest("#lbx")||t.id==="lb")return closeLB();
   if(t.closest("#lbd"))return dl();
   if(t.closest("#lbp"))return lbGo(-1);
@@ -463,7 +476,7 @@ document.addEventListener("click",e=>{
   if(b=t.closest("[data-p]"))return go("person",{id:b.dataset.p});
   if(b=t.closest("[data-pf]")){document.querySelectorAll("[data-pf]").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll("#pg .cd").forEach(c=>c.hidden=c.dataset.o!==b.dataset.pf);return}
   if(b=t.closest("[data-it]")){document.querySelectorAll("[data-it]").forEach(x=>x.classList.toggle("on",x===b));$("#ig").innerHTML=igHtml(window.IG[b.dataset.it]);return}
-  if(b=t.closest("[data-mode]")){const r=S.route;if(S.flt[r]){S.flt[r]={sort:"",year:""};$("#fs").value="";$("#fy").value=""}S.mode[r]=b.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",x===b));const c=$(".chips"),y=c.getBoundingClientRect().top+scrollY-70;if(scrollY>y)scrollTo(0,y);return mount(r+":"+b.dataset.mode,fetcher(r,b.dataset.mode))}
+  if(b=t.closest("[data-mode]")){const r=S.route;if(S.flt[r]){S.flt[r]={sort:"",year:"",country:"",lang:""};["fs","fy","fc","fl"].forEach(i=>$("#"+i).value="");$("#fl").hidden=true}S.mode[r]=b.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",x===b));const c=$(".chips"),y=c.getBoundingClientRect().top+scrollY-70;if(scrollY>y)scrollTo(0,y);return mount(r+":"+b.dataset.mode,fetcher(r,b.dataset.mode))}
   if(b=t.closest("[data-o]")){if(H.sw&&b.id==="hero")return;if(S.route==="search"){const q=$("#q")?.value.trim();q&&q.length>1&&saveRec(q)}delete S.ds[b.dataset.o+b.dataset.id];go("detail",{type:b.dataset.o,id:b.dataset.id})}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#lb").hidden)return closeLB();if(e.key==="Enter"&&e.target.id==="q")saveRec(e.target.value.trim());if(!$("#lb").hidden&&(e.key==="ArrowRight"||e.key==="ArrowLeft")&&LBL.length>1){LBi=(LBi+(e.key==="ArrowRight"?1:-1)+LBL.length)%LBL.length;return showLB(LBL[LBi])}if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-o],[data-ep],[data-p],[data-md],[data-hs],[data-pp]")){e.preventDefault();e.target.click()}});
